@@ -614,7 +614,7 @@ body.dark-mode .onboarding-card p {
     align-items: center;
     gap: 20px;
     padding: 40px 20px;
-    min-height: 80vh;
+    min-height: 20vh;
     justify-content: center;
 }
 
