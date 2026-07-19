@@ -52,6 +52,7 @@ export function stopMouthAnimation() {
 }
 
 function finishSpeaking(onEnd) {
+    stopKeepAlive();
     setSpeaking(false);
     const btn = document.getElementById('speakButton');
     if (btn) btn.disabled = false;
@@ -61,6 +62,19 @@ function finishSpeaking(onEnd) {
 
 const speechQueue = [];
 let isProcessingQueue = false;
+let keepAliveInterval = null;
+
+function startKeepAlive() {
+    stopKeepAlive();
+    keepAliveInterval = setInterval(() => {
+        if (speechSynthesis.speaking) speechSynthesis.resume();
+    }, 14000);
+}
+
+function stopKeepAlive() {
+    if (keepAliveInterval) clearInterval(keepAliveInterval);
+    keepAliveInterval = null;
+}
 
 function waitForSpeechReady() {
     return new Promise((resolve) => {
@@ -160,11 +174,13 @@ async function processQueue() {
     };
 
     setSpeaking(true);
+    startKeepAlive();
     speechSynthesis.speak(utterance);
 }
 
 export function stop() {
     speechSynthesis.cancel();
+    stopKeepAlive();
     speechQueue.length = 0;
     isProcessingQueue = false;
     setSpeaking(false);

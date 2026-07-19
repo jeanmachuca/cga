@@ -36,7 +36,7 @@ export function toggleListening() {
                 document.getElementById('textToSpeak').value = transcript;
                 setListening(false);
                 micButton.classList.remove('listening');
-                await handleUserInput(transcript);
+                setTimeout(() => handleUserInput(transcript), 500);
             },
             (event) => {
                 console.error('Speech recognition error:', event.error);
@@ -74,7 +74,7 @@ function autoListen() {
             document.getElementById('textToSpeak').value = transcript;
             setListening(false);
             micButton.classList.remove('listening');
-            await handleUserInput(transcript);
+            setTimeout(() => handleUserInput(transcript), 500);
         },
         (event) => {
             console.error('Speech recognition error:', event.error);
