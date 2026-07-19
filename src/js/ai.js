@@ -55,19 +55,18 @@ async function persistConfig() {
         knowledgeBaseUrl: config.knowledgeBaseUrl,
     };
 
+    localStorage.setItem('cga_gemini_api_key', config.apiKey);
+    localStorage.setItem('cga_gemini_model', config.model);
+    localStorage.setItem('cga_knowledge_url', config.knowledgeBaseUrl);
+
     if (typeof Auth !== 'undefined' && Auth.isGoogleUser() && Auth.getToken()) {
         try {
             await DriveVault.saveFile('config', data);
-            updateStatusText('configSaved');
-            return;
         } catch (e) {
             console.warn('Failed to save config to Drive:', e);
         }
     }
 
-    localStorage.setItem('cga_gemini_api_key', config.apiKey);
-    localStorage.setItem('cga_gemini_model', config.model);
-    localStorage.setItem('cga_knowledge_url', config.knowledgeBaseUrl);
     updateStatusText('configSaved');
 }
 
