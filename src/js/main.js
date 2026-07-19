@@ -6,7 +6,7 @@ import {
     showCamera, hideCamera, updateCameraStatus,
     showOnboardingOverlay, hideOnboardingOverlay, updateOnboardingText,
     updateTrainingProgress, hideTrainingProgress, t,
-    showMainApp, saveLanguage, restoreLanguage,
+    showMainApp, saveLanguage, restoreLanguage, getSelectedLanguage,
 } from './ui.js';
 import {
     initializeSpeechRecognition, speechRecognition, setListening, isListening,
@@ -17,6 +17,10 @@ import {
 
 let authUser = null;
 let lastResponse = '';
+
+function getSpeechLang() {
+    return getSelectedLanguage() === 'es' ? 'es-MX' : 'en-US';
+}
 
 if (!initializeSpeechRecognition()) {
     console.warn('Speech recognition initialization failed');
@@ -29,7 +33,6 @@ export function toggleListening() {
     }
     const micButton = document.getElementById('micButton');
     if (!isListening()) {
-        const languageCode = 'en-US';
         setupSpeechRecognitionHandlers(
             () => {
                 setListening(true);
@@ -51,7 +54,7 @@ export function toggleListening() {
             },
             () => { stopListening(); }
         );
-        if (!startSpeechRecognition(languageCode)) {
+        if (!startSpeechRecognition(getSpeechLang())) {
             updateStatusText('errorStartingRecognition');
             stopListening();
         }
@@ -91,7 +94,7 @@ function autoListen() {
         },
         () => { stopListening(); }
     );
-    startSpeechRecognition('en-US');
+    startSpeechRecognition(getSpeechLang());
 }
 
 function voiceCommandsHandler(text) {
