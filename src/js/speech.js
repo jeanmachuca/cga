@@ -7,9 +7,6 @@ import {
 
 export const speechSynthesis = window.speechSynthesis;
 
-let warmedUp = false;
-let cancelTime = 0;
-
 speechSynthesis.onvoiceschanged = () => {
     setVoices(speechSynthesis.getVoices());
 };
@@ -62,27 +59,29 @@ function finishSpeaking(onEnd) {
     if (onEnd) onEnd();
 }
 
-export function stop() {
-    speechSynthesis.cancel();
-    cancelTime = Date.now();
-    setSpeaking(false);
-    const btn = document.getElementById('speakButton');
-    if (btn) btn.disabled = false;
-    stopMouthAnimation();
+const speechQueue = [];
+let isProcessingQueue = false;
+
+function waitForSpeechReady() {
+    return new Promise((resolve) => {
+        const check = () => {
+            if (!speechSynthesis.speaking && !speechSynthesis.pending) {
+                resolve();
+            } else {
+                setTimeout(check, 50);
+            }
+        };
+        check();
+    });
 }
 
-export function speak(textOrEvent, onEnd) {
-    if (isSpeaking()) return;
+async function processQueue() {
+    if (isProcessingQueue || speechQueue.length === 0) return;
+    isProcessingQueue = true;
 
-    let text;
-    if (typeof textOrEvent === 'string') {
-        text = textOrEvent;
-    } else {
-        text = document.getElementById('textToSpeak').value;
-    }
-    if (!text) return;
+    const { text, onEnd } = speechQueue.shift();
+    await waitForSpeechReady();
 
-    setSpeaking(true);
     const cleanText = cleanMarkdown(text);
     const utterance = new SpeechSynthesisUtterance(cleanText);
     const selectedVoice = getSelectedVoice();
@@ -101,32 +100,37 @@ export function speak(textOrEvent, onEnd) {
         let currentChunk = 0;
         let active = true;
 
-        const speakNext = () => {
+        const speakNextChunk = async () => {
             if (!active) return;
             currentChunk++;
             if (currentChunk < chunks.length) {
-                setTimeout(() => {
-                    if (!active) return;
-                    const next = new SpeechSynthesisUtterance(chunks[currentChunk]);
-                    next.voice = selectedVoice;
-                    next.lang = selectedVoice?.lang;
-                    next.rate = isSpanish ? 0.85 : 0.9;
-                    next.pitch = isSpanish ? 0.9 : 1.0;
-                    next.onerror = (e) => { if (e.error !== 'interrupted') console.error('Chunk error:', e); };
-                    next.onend = speakNext;
-                    next.onstart = () => updateMouthAnimation();
-                    next.onboundary = (e) => { if (e.name === 'word') updateMouthAnimation(); };
-                    speechSynthesis.speak(next);
-                }, isSpanish ? 500 : 100);
+                await waitForSpeechReady();
+                if (!active) return;
+                const next = new SpeechSynthesisUtterance(chunks[currentChunk]);
+                next.voice = selectedVoice;
+                next.lang = selectedVoice?.lang;
+                next.rate = isSpanish ? 0.85 : 0.9;
+                next.pitch = isSpanish ? 0.9 : 1.0;
+                next.onerror = (e) => { if (e.error !== 'interrupted') console.error('Chunk error:', e); };
+                next.onend = speakNextChunk;
+                next.onstart = () => updateMouthAnimation();
+                next.onboundary = (e) => { if (e.name === 'word') updateMouthAnimation(); };
+                speechSynthesis.speak(next);
             } else {
                 active = false;
                 finishSpeaking(onEnd);
+                isProcessingQueue = false;
+                processQueue();
             }
         };
 
-        utterance.onend = speakNext;
+        utterance.onend = speakNextChunk;
     } else {
-        utterance.onend = () => finishSpeaking(onEnd);
+        utterance.onend = () => {
+            finishSpeaking(onEnd);
+            isProcessingQueue = false;
+            processQueue();
+        };
     }
 
     utterance.onstart = () => {
@@ -146,19 +150,33 @@ export function speak(textOrEvent, onEnd) {
         if (event.error === 'interrupted') return;
         console.error('Speech synthesis error:', event);
         finishSpeaking(onEnd);
+        isProcessingQueue = false;
+        processQueue();
     };
 
-    const doSpeak = () => {
-        speechSynthesis.speak(utterance);
-    };
+    setSpeaking(true);
+    speechSynthesis.speak(utterance);
+}
 
-    const elapsed = Date.now() - cancelTime;
-    if (elapsed < 100) {
-        setTimeout(doSpeak, 100 - elapsed);
-    } else if (!warmedUp) {
-        warmedUp = true;
-        setTimeout(doSpeak, 200);
+export function stop() {
+    speechSynthesis.cancel();
+    speechQueue.length = 0;
+    isProcessingQueue = false;
+    setSpeaking(false);
+    const btn = document.getElementById('speakButton');
+    if (btn) btn.disabled = false;
+    stopMouthAnimation();
+}
+
+export function speak(textOrEvent, onEnd) {
+    let text;
+    if (typeof textOrEvent === 'string') {
+        text = textOrEvent;
     } else {
-        doSpeak();
+        text = document.getElementById('textToSpeak').value;
     }
+    if (!text) return;
+
+    speechQueue.push({ text, onEnd });
+    processQueue();
 }
