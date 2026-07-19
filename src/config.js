@@ -1,0 +1,19 @@
+const APP_CONFIG = {
+  googleClientId: '__GOOGLE_CLIENT_ID__',
+  driveConfigFile: 'cga_config.json',
+  driveFaceFile: 'cga_face_data.json',
+  driveHistoryFile: 'cga_conversation_history.json',
+  storageKey: 'cga_session',
+  guestStorageKey: 'cga_guest_config',
+  appName: 'Cognitive Avatar',
+  scopes: 'https://www.googleapis.com/auth/drive.appdata',
+  faceDescriptorsFile: 'cga_face_descriptors.json',
+  maxHistoryTurns: 15,
+  knowledgeBaseUrl: '',
+  faceDetection: {
+    descriptorThreshold: 0.6,
+    snapshotCount: 3,
+    snapshotIntervalMs: 1000,
+    modelUrl: 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.15/model',
+  },
+};

@@ -1,0 +1,15 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Misc
+.DS_Store
+.env
+.env.*
+
+# Editor
+.idea/
+.vscode/
+*.sw?

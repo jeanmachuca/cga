@@ -1,0 +1,38 @@
+name: Deploy to Pages
+on:
+  push:
+    branches: [main]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build dist from src
+        run: cp -r src dist && cp .nojekyll dist/
+
+      - name: Inject Google Client ID from secrets
+        run: |
+          node -e "
+            const fs = require('fs');
+            const content = fs.readFileSync('dist/config.js', 'utf8');
+            const replaced = content.replace('__GOOGLE_CLIENT_ID__', process.env.CLIENT_ID);
+            fs.writeFileSync('dist/config.js', replaced);
+          "
+        env:
+          CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+
+      - uses: actions/configure-pages@v4
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
