@@ -75,6 +75,10 @@ function waitForSpeechReady() {
     });
 }
 
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 async function processQueue() {
     if (isProcessingQueue || speechQueue.length === 0) return;
     isProcessingQueue = true;
@@ -94,6 +98,14 @@ async function processQueue() {
         utterance.pitch = isSpanish ? 0.9 : 1.0;
     }
 
+    const afterUtterance = async () => {
+        await delay(100);
+        await waitForSpeechReady();
+        finishSpeaking(onEnd);
+        isProcessingQueue = false;
+        processQueue();
+    };
+
     if (cleanText.length > 200) {
         const chunkSize = isSpanish ? 80 : 200;
         const chunks = cleanText.match(new RegExp(`.{1,${chunkSize}}(?=\\s|$)`, 'g')) || [];
@@ -104,6 +116,7 @@ async function processQueue() {
             if (!active) return;
             currentChunk++;
             if (currentChunk < chunks.length) {
+                await delay(100);
                 await waitForSpeechReady();
                 if (!active) return;
                 const next = new SpeechSynthesisUtterance(chunks[currentChunk]);
@@ -118,19 +131,13 @@ async function processQueue() {
                 speechSynthesis.speak(next);
             } else {
                 active = false;
-                finishSpeaking(onEnd);
-                isProcessingQueue = false;
-                processQueue();
+                await afterUtterance();
             }
         };
 
         utterance.onend = speakNextChunk;
     } else {
-        utterance.onend = () => {
-            finishSpeaking(onEnd);
-            isProcessingQueue = false;
-            processQueue();
-        };
+        utterance.onend = afterUtterance;
     }
 
     utterance.onstart = () => {
@@ -146,12 +153,10 @@ async function processQueue() {
     utterance.onpause = () => stopMouthAnimation();
     utterance.onresume = () => updateMouthAnimation();
 
-    utterance.onerror = (event) => {
+    utterance.onerror = async (event) => {
         if (event.error === 'interrupted') return;
         console.error('Speech synthesis error:', event);
-        finishSpeaking(onEnd);
-        isProcessingQueue = false;
-        processQueue();
+        await afterUtterance();
     };
 
     setSpeaking(true);
