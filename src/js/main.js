@@ -175,11 +175,21 @@ async function startFaceTraining() {
         hideOnboardingOverlay();
         hideCamera();
         speakWithAutoListen(t('onboardingComplete', { name }));
+        checkAndShowConfig();
     } else {
         setOnboardingState('idle');
         hideOnboardingOverlay();
         hideCamera();
         speakWithAutoListen(t('onboardingFailed'));
+        checkAndShowConfig();
+    }
+}
+
+function checkAndShowConfig() {
+    if (!isConfigValid()) {
+        showConfigForm(Auth.isGoogleUser() ? 'google' : 'guest');
+    } else {
+        hideConfigForm();
     }
 }
 
@@ -194,12 +204,8 @@ async function handleAuthChange(user) {
             alert('Google Drive is not available. Config will be stored in browser only.');
         }
 
-        if (!isConfigValid()) {
-            showConfigForm(Auth.isGoogleUser() ? 'google' : 'guest');
-        } else {
-            hideConfigForm();
-            await startSession();
-        }
+        hideConfigForm();
+        await startSession();
     } else {
         hideConfigForm();
         hideCamera();
@@ -250,7 +256,6 @@ window.toggleTheme = toggleTheme;
 window.saveAzureConfig = async function () {
     await saveAzureConfig();
     hideConfigForm();
-    await startSession();
 };
 window.showSettings = showSettings;
 window.hideSettings = hideSettings;
