@@ -39,7 +39,9 @@ export function toggleListening() {
                 setTimeout(() => handleUserInput(transcript), 500);
             },
             (event) => {
-                console.error('Speech recognition error:', event.error);
+                if (event.error !== 'no-speech') {
+                    console.error('Speech recognition error:', event.error);
+                }
                 stopListening();
             },
             () => { stopListening(); }
@@ -77,7 +79,9 @@ function autoListen() {
             setTimeout(() => handleUserInput(transcript), 500);
         },
         (event) => {
-            console.error('Speech recognition error:', event.error);
+            if (event.error !== 'no-speech') {
+                console.error('Speech recognition error:', event.error);
+            }
             stopListening();
         },
         () => { stopListening(); }
