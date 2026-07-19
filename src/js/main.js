@@ -164,6 +164,10 @@ async function startFaceTraining() {
 
     const success = await Face.train(name, (current, total) => {
         updateTrainingProgress(current, total);
+    }, (attempt, max) => {
+        if (attempt === 1) {
+            speakWithAutoListen(t('faceDetectHint'));
+        }
     });
 
     hideTrainingProgress();
@@ -180,7 +184,7 @@ async function startFaceTraining() {
         setOnboardingState('idle');
         hideOnboardingOverlay();
         hideCamera();
-        speakWithAutoListen(t('onboardingFailed'));
+        speakWithAutoListen(t('faceDetectTimeout'));
         checkAndShowConfig();
     }
 }

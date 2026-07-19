@@ -70,11 +70,13 @@ const Face = (() => {
     return Array.from(detection.descriptor);
   }
 
-  async function train(name, onProgress) {
+  async function train(name, onProgress, onRetry) {
     userName = name;
     const snapshots = [];
     const count = APP_CONFIG.faceDetection.snapshotCount;
     const interval = APP_CONFIG.faceDetection.snapshotIntervalMs;
+    const maxAttempts = 15;
+    let attempts = 0;
 
     for (let i = 0; i < count; i++) {
       if (onProgress) onProgress(i + 1, count);
@@ -82,7 +84,11 @@ const Face = (() => {
       const descriptor = await captureSnapshot();
       if (descriptor) {
         snapshots.push(descriptor);
+        attempts = 0;
       } else {
+        attempts++;
+        if (attempts >= maxAttempts) return false;
+        if (onRetry) onRetry(attempts, maxAttempts);
         i--;
       }
     }
