@@ -7,6 +7,9 @@ import {
 
 export const speechSynthesis = window.speechSynthesis;
 
+let warmedUp = false;
+let cancelTime = 0;
+
 speechSynthesis.onvoiceschanged = () => {
     setVoices(speechSynthesis.getVoices());
 };
@@ -61,6 +64,7 @@ function finishSpeaking(onEnd) {
 
 export function stop() {
     speechSynthesis.cancel();
+    cancelTime = Date.now();
     setSpeaking(false);
     const btn = document.getElementById('speakButton');
     if (btn) btn.disabled = false;
@@ -144,5 +148,17 @@ export function speak(textOrEvent, onEnd) {
         finishSpeaking(onEnd);
     };
 
-    speechSynthesis.speak(utterance);
+    const doSpeak = () => {
+        speechSynthesis.speak(utterance);
+    };
+
+    const elapsed = Date.now() - cancelTime;
+    if (elapsed < 100) {
+        setTimeout(doSpeak, 100 - elapsed);
+    } else if (!warmedUp) {
+        warmedUp = true;
+        setTimeout(doSpeak, 200);
+    } else {
+        doSpeak();
+    }
 }
