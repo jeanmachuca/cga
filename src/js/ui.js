@@ -32,24 +32,10 @@ export function updateVoices() {
     const textarea = document.getElementById('textToSpeak');
     const speakButton = document.getElementById('speakButton');
     const stopButton = document.getElementById('stopButton');
-    const showSettingsLabel = document.querySelector('label[for="show-settings"]');
-    const hideSettingsLabel = document.querySelector('label[for="hide-settings"]');
 
     if (textarea) textarea.placeholder = texts.placeholder;
     if (speakButton) speakButton.textContent = texts.speakButton;
     if (stopButton) stopButton.textContent = texts.stopButton;
-    if (showSettingsLabel) showSettingsLabel.textContent = texts.showSettings;
-    if (hideSettingsLabel) hideSettingsLabel.textContent = texts.hideSettings;
-}
-
-export function showSettings() {
-    const voiceControls = document.querySelector('.voice-controls');
-    if (voiceControls) voiceControls.classList.add('visible');
-}
-
-export function hideSettings() {
-    const voiceControls = document.querySelector('.voice-controls');
-    if (voiceControls) voiceControls.classList.remove('visible');
 }
 
 export function toggleTheme() {
@@ -145,7 +131,40 @@ export function updateTrainingProgress(current, total) {
 
 export function hideTrainingProgress() {
     const el = document.getElementById('trainingProgress');
-    if (el) el.classList.remove('visible');
+    el.classList.remove('visible');
+}
+
+export function showMainApp() {
+    const mainApp = document.getElementById('mainApp');
+    const welcomeScreen = document.getElementById('welcomeScreen');
+    if (mainApp) {
+        mainApp.classList.remove('hidden');
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                mainApp.classList.add('main-app-visible');
+            });
+        });
+    }
+    if (welcomeScreen) {
+        welcomeScreen.classList.add('welcome-compact');
+    }
+}
+
+export function saveLanguage(lang) {
+    localStorage.setItem('cga_language', lang);
+}
+
+export function loadLanguage() {
+    return localStorage.getItem('cga_language') || 'en';
+}
+
+export function restoreLanguage() {
+    const saved = loadLanguage();
+    const radio = document.querySelector(`input[name="language"][value="${saved}"]`);
+    if (radio) {
+        radio.checked = true;
+        updateVoices();
+    }
 }
 
 if (localStorage.getItem('darkMode') === 'true') {

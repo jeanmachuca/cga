@@ -2,16 +2,20 @@ import { stop, speak } from './speech.js';
 import { loadConfig, saveAzureConfig, getChatResponse, isConfigValid, loadHistory, getConfig } from './ai.js';
 import {
     updateStatusText, updateVoices, toggleTheme, updateAuthUI,
-    showConfigForm, hideConfigForm, showSettings, hideSettings,
+    showConfigForm, hideConfigForm,
     showCamera, hideCamera, updateCameraStatus,
     showOnboardingOverlay, hideOnboardingOverlay, updateOnboardingText,
     updateTrainingProgress, hideTrainingProgress, t,
+    showMainApp, saveLanguage, restoreLanguage,
 } from './ui.js';
 import {
     initializeSpeechRecognition, speechRecognition, setListening, isListening,
     setupSpeechRecognitionHandlers, startSpeechRecognition, stopSpeechRecognition,
     setOnboardingState, getOnboardingState, setOnboardingName, getOnboardingName,
+    setAppReady, isAppReady,
 } from './state.js';
+
+let authUser = null;
 
 if (!initializeSpeechRecognition()) {
     console.warn('Speech recognition initialization failed');
@@ -201,7 +205,17 @@ function checkAndShowConfig() {
     }
 }
 
+function tryShowMainApp() {
+    if (isAppReady()) return;
+    if (authUser && document.querySelector('input[name="language"]:checked')) {
+        setAppReady(true);
+        showMainApp();
+        startSession();
+    }
+}
+
 async function handleAuthChange(user) {
+    authUser = user;
     updateAuthUI(user);
 
     if (user) {
@@ -213,7 +227,7 @@ async function handleAuthChange(user) {
         }
 
         hideConfigForm();
-        await startSession();
+        tryShowMainApp();
     } else {
         hideConfigForm();
         hideCamera();
@@ -261,14 +275,19 @@ window.stop = stop;
 window.toggleListening = toggleListening;
 window.updateVoices = updateVoices;
 window.toggleTheme = toggleTheme;
+window.onLanguageChange = function () {
+    const lang = document.querySelector('input[name="language"]:checked').value;
+    saveLanguage(lang);
+    updateVoices();
+    tryShowMainApp();
+};
 window.saveAzureConfig = async function () {
     await saveAzureConfig();
     hideConfigForm();
 };
-window.showSettings = showSettings;
-window.hideSettings = hideSettings;
 
 document.addEventListener('DOMContentLoaded', () => {
+    restoreLanguage();
     Auth.onAuthChange(handleAuthChange);
     handleAuthChange(Auth.getUser());
 });

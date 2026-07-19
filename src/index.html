@@ -14,60 +14,53 @@
 <body>
     <div class="theme-toggle" onclick="toggleTheme()">&#9789;</div>
     <div class="container">
-        <div class="auth-section">
-            <div id="userDisplay" class="user-display"></div>
-            <div id="loginContainer" class="login-container"></div>
-        </div>
-        <div class="avatar" id="avatar">
-            <img src="img/avatar.png" alt="Avatar Closed Mouth" class="closed-mouth">
-            <img src="img/avatar2.png" alt="Avatar Open Mouth" class="open-mouth">
-        </div>
-        <div class="camera-container" id="cameraContainer">
-            <video id="cameraVideo" autoplay muted playsinline></video>
-            <div id="cameraStatus" class="camera-status"></div>
-            <div id="trainingProgress" class="training-progress"></div>
-        </div>
-        <div class="controls">
-            <div id="configForm" class="config-form hidden">
-                <h3 id="configTitle">Configure Azure OpenAI</h3>
-                <input type="password" id="apiKey" placeholder="Azure OpenAI API Key">
-                <input type="text" id="azureResourceName" placeholder="Azure Resource Name">
-                <input type="text" id="deploymentName" placeholder="Deployment Name">
-                <input type="text" id="knowledgeBaseUrl" placeholder="Knowledge Base URL (optional)">
-                <button id="saveConfigBtn" onclick="saveAzureConfig()">Save</button>
-                <p class="config-warning" id="configWarning"></p>
-            </div>
-            <div class="show-settings">
+        <div id="welcomeScreen" class="welcome-screen">
+            <h1 class="welcome-title">Cognitive Avatar</h1>
+            <div class="welcome-language">
                 <div class="radio-group">
                     <div class="radio-option">
-                        <input type="radio" id="show-settings" name="settings" value="show" onchange="showSettings()">
-                        <label for="show-settings">Show Settings</label>
-                    </div>
-                    <div class="radio-option">
-                        <input type="radio" id="hide-settings" name="settings" value="hide" checked onchange="hideSettings()">
-                        <label for="hide-settings">Hide Settings</label>
-                    </div>
-                </div>
-            </div>
-            <div class="voice-controls">
-                <div class="radio-group">
-                    <div class="radio-option">
-                        <input type="radio" id="en" name="language" value="en" checked onchange="updateVoices()">
+                        <input type="radio" id="en" name="language" value="en" checked onchange="onLanguageChange()">
                         <label for="en">English</label>
                     </div>
                     <div class="radio-option">
-                        <input type="radio" id="es" name="language" value="es" onchange="updateVoices()">
+                        <input type="radio" id="es" name="language" value="es" onchange="onLanguageChange()">
                         <label for="es">Spanish</label>
                     </div>
                 </div>
             </div>
-            <textarea id="textToSpeak" placeholder="Type something or speak..."></textarea>
-            <div class="button-group">
-                <button id="speakButton" onclick="speak()">Speak</button>
-                <button id="stopButton" onclick="stop()">Stop</button>
-                <button class="mic-button" id="micButton" onclick="toggleListening()">&#127908;</button>
+            <div class="auth-section">
+                <div id="userDisplay" class="user-display"></div>
+                <div id="loginContainer" class="login-container"></div>
             </div>
-            <div class="status-text" id="statusText"></div>
+        </div>
+        <div id="mainApp" class="hidden">
+            <div class="avatar" id="avatar">
+                <img src="img/avatar.png" alt="Avatar Closed Mouth" class="closed-mouth">
+                <img src="img/avatar2.png" alt="Avatar Open Mouth" class="open-mouth">
+            </div>
+            <div class="camera-container" id="cameraContainer">
+                <video id="cameraVideo" autoplay muted playsinline></video>
+                <div id="cameraStatus" class="camera-status"></div>
+                <div id="trainingProgress" class="training-progress"></div>
+            </div>
+            <div class="controls">
+                <div id="configForm" class="config-form hidden">
+                    <h3 id="configTitle">Configure Azure OpenAI</h3>
+                    <input type="password" id="apiKey" placeholder="Azure OpenAI API Key">
+                    <input type="text" id="azureResourceName" placeholder="Azure Resource Name">
+                    <input type="text" id="deploymentName" placeholder="Deployment Name">
+                    <input type="text" id="knowledgeBaseUrl" placeholder="Knowledge Base URL (optional)">
+                    <button id="saveConfigBtn" onclick="saveAzureConfig()">Save</button>
+                    <p class="config-warning" id="configWarning"></p>
+                </div>
+                <textarea id="textToSpeak" placeholder="Type something or speak..."></textarea>
+                <div class="button-group">
+                    <button id="speakButton" onclick="speak()">Speak</button>
+                    <button id="stopButton" onclick="stop()">Stop</button>
+                    <button class="mic-button" id="micButton" onclick="toggleListening()">&#127908;</button>
+                </div>
+                <div class="status-text" id="statusText"></div>
+            </div>
         </div>
     </div>
     <script type="module" src="js/main.js"></script>

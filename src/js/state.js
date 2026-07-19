@@ -9,6 +9,7 @@ export let onboardingState = 'idle';
 export let onboardingName = '';
 export let cameraActive = false;
 export let faceRecognized = false;
+export let appReady = false;
 
 export function initializeSpeechRecognition() {
     try {
@@ -72,3 +73,5 @@ export function setCameraActive(value) { cameraActive = value; }
 export function isCameraActive() { return cameraActive; }
 export function setFaceRecognized(value) { faceRecognized = value; }
 export function isFaceRecognized() { return faceRecognized; }
+export function setAppReady(value) { appReady = value; }
+export function isAppReady() { return appReady; }
