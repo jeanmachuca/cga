@@ -30,12 +30,7 @@ export function updateStatusText(text) {
 export function updateVoices() {
     const texts = TEXTS[getSelectedLanguage()];
     const textarea = document.getElementById('textToSpeak');
-    const speakButton = document.getElementById('speakButton');
-    const stopButton = document.getElementById('stopButton');
-
     if (textarea) textarea.placeholder = texts.placeholder;
-    if (speakButton) speakButton.textContent = texts.speakButton;
-    if (stopButton) stopButton.textContent = texts.stopButton;
 }
 
 export function toggleTheme() {

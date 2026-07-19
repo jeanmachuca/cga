@@ -270,10 +270,7 @@ async function startSession() {
     }
 }
 
-window.speak = speak;
-window.stop = stop;
 window.toggleListening = toggleListening;
-window.updateVoices = updateVoices;
 window.toggleTheme = toggleTheme;
 window.onLanguageChange = function () {
     const lang = document.querySelector('input[name="language"]:checked').value;

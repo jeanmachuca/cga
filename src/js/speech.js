@@ -54,8 +54,6 @@ export function stopMouthAnimation() {
 function finishSpeaking(onEnd) {
     stopKeepAlive();
     setSpeaking(false);
-    const btn = document.getElementById('speakButton');
-    if (btn) btn.disabled = false;
     stopMouthAnimation();
     if (onEnd) onEnd();
 }
@@ -155,8 +153,6 @@ async function processQueue() {
     }
 
     utterance.onstart = () => {
-        const btn = document.getElementById('speakButton');
-        if (btn) btn.disabled = true;
         updateMouthAnimation();
     };
 
@@ -184,8 +180,6 @@ export function stop() {
     speechQueue.length = 0;
     isProcessingQueue = false;
     setSpeaking(false);
-    const btn = document.getElementById('speakButton');
-    if (btn) btn.disabled = false;
     stopMouthAnimation();
 }
 

@@ -1,12 +1,6 @@
 export const TEXTS = {
   en: {
     placeholder: 'Type something or speak...',
-    speakButton: 'Speak',
-    stopButton: 'Stop',
-    showSettings: 'Show Settings',
-    hideSettings: 'Hide Settings',
-    english: 'English',
-    spanish: 'Spanish',
     listening: 'Listening...',
     thinking: 'Thinking...',
     speaking: 'Speaking...',
@@ -41,12 +35,6 @@ export const TEXTS = {
   },
   es: {
     placeholder: 'Escribe algo o habla...',
-    speakButton: 'Hablar',
-    stopButton: 'Parar',
-    showSettings: 'Mostrar Configuración',
-    hideSettings: 'Ocultar Configuración',
-    english: 'Inglés',
-    spanish: 'Español',
     listening: 'Escuchando...',
     thinking: 'Pensando...',
     speaking: 'Hablando...',
