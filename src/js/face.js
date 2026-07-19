@@ -29,7 +29,7 @@ const Face = (() => {
     videoElement = videoEl;
     try {
       stream = await navigator.mediaDevices.getUserMedia({
-        video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' },
+        video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' },
         audio: false,
       });
       videoElement.srcObject = stream;
@@ -55,9 +55,9 @@ const Face = (() => {
     if (!modelsLoaded || !videoElement || videoElement.readyState < 2) return null;
     try {
       const detection = await faceapi
-        .detectSingleFace(videoElement, new faceapi.SsdMobilenetv1Options())
+        .detectSingleFace(videoElement, new faceapi.SsdMobilenetv1Options({ minConfidence: APP_CONFIG.faceDetection.minConfidence }))
         .withFaceLandmarks()
-        .withFaceDescriptors();
+        .withFaceDescriptor();
       return detection || null;
     } catch {
       return null;

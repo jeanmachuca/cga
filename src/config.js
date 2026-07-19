@@ -14,6 +14,7 @@ const APP_CONFIG = {
     descriptorThreshold: 0.6,
     snapshotCount: 3,
     snapshotIntervalMs: 1000,
+    minConfidence: 0.5,
     modelUrl: 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.15/model',
   },
 };
