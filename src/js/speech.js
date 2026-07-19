@@ -110,7 +110,10 @@ async function processQueue() {
         utterance.pitch = isSpanish ? 0.9 : 1.0;
     }
 
+    let finished = false;
     const afterUtterance = async () => {
+        if (finished) return;
+        finished = true;
         await delay(100);
         await waitForSpeechReady();
         finishSpeaking(onEnd);
@@ -148,8 +151,14 @@ async function processQueue() {
         };
 
         utterance.onend = speakNextChunk;
+        utterance.onerror = (e) => { if (e.error !== 'interrupted') console.error('Chunk error:', e); };
     } else {
         utterance.onend = afterUtterance;
+        utterance.onerror = async (event) => {
+            if (event.error === 'interrupted') return;
+            console.error('Speech synthesis error:', event);
+            await afterUtterance();
+        };
     }
 
     utterance.onstart = () => {
@@ -162,12 +171,6 @@ async function processQueue() {
 
     utterance.onpause = () => stopMouthAnimation();
     utterance.onresume = () => updateMouthAnimation();
-
-    utterance.onerror = async (event) => {
-        if (event.error === 'interrupted') return;
-        console.error('Speech synthesis error:', event);
-        await afterUtterance();
-    };
 
     setSpeaking(true);
     startKeepAlive();
