@@ -61,7 +61,7 @@ function stopListening() {
 }
 
 function autoListen() {
-    if (!speechRecognition) return;
+    if (!speechRecognition || isListening()) return;
     const micButton = document.getElementById('micButton');
     setupSpeechRecognitionHandlers(
         () => {
