@@ -448,81 +448,6 @@ body.dark-mode .auth-signout-btn {
                inset -2px -2px 4px #ffffff;
 }
 
-.config-form {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    padding: 15px;
-    border-radius: 15px;
-    background: #e0e5ec;
-    box-shadow: inset 5px 5px 10px #bec5cc,
-               inset -5px -5px 10px #ffffff;
-    transition: all 0.3s ease;
-}
-
-body.dark-mode .config-form {
-    background: #2d2d2d;
-    box-shadow: inset 5px 5px 10px #1a1a1a,
-               inset -5px -5px 10px #404040;
-}
-
-.config-form.hidden {
-    display: none;
-}
-
-.config-form h3 {
-    margin: 0 0 5px 0;
-    font-size: 15px;
-    color: #2d4059;
-}
-
-body.dark-mode .config-form h3 {
-    color: #e0e5ec;
-}
-
-.config-form input {
-    width: 100%;
-    padding: 12px;
-    border: none;
-    border-radius: 12px;
-    font-size: 13px;
-    box-sizing: border-box;
-    background: #e0e5ec;
-    box-shadow: inset 3px 3px 6px #bec5cc,
-               inset -3px -3px 6px #ffffff;
-    color: #2d4059;
-    transition: all 0.3s ease;
-}
-
-body.dark-mode .config-form input {
-    background: #2d2d2d;
-    box-shadow: inset 3px 3px 6px #1a1a1a,
-               inset -3px -3px 6px #404040;
-    color: #e0e5ec;
-}
-
-.config-form button {
-    width: 100%;
-    max-width: 200px;
-    padding: 10px 20px;
-    font-size: 14px;
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    background: linear-gradient(145deg, #4CAF50, #45a049);
-    color: white;
-    box-shadow: 3px 3px 6px #bec5cc,
-               -3px -3px 6px #ffffff;
-    transition: all 0.3s ease;
-}
-
-.config-form button:hover {
-    box-shadow: inset 2px 2px 4px rgba(0,0,0,0.2),
-               inset -2px -2px 4px rgba(255,255,255,0.1);
-}
-
 .config-warning {
     font-size: 12px;
     color: #f59e0b;
@@ -747,4 +672,141 @@ body.dark-mode .welcome-title {
 
 .welcome-screen.welcome-compact .welcome-title {
     display: none;
+}
+
+.config-onboarding {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 80vh;
+    padding: 40px 20px;
+}
+
+.config-card {
+    max-width: 400px;
+    width: 100%;
+    padding: 30px;
+    border-radius: 20px;
+    background: #e0e5ec;
+    box-shadow: 20px 20px 60px #bec5cc,
+               -20px -20px 60px #ffffff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+body.dark-mode .config-card {
+    background: #1a1a1a;
+    box-shadow: 20px 20px 60px #0a0a0a,
+               -20px -20px 60px #2a2a2a;
+}
+
+.config-card h3 {
+    margin: 0;
+    font-size: 20px;
+    color: #2d4059;
+    font-weight: 700;
+}
+
+body.dark-mode .config-card h3 {
+    color: #e0e5ec;
+}
+
+.config-card-desc {
+    margin: 0;
+    font-size: 14px;
+    color: #5a6a7a;
+    text-align: center;
+    line-height: 1.5;
+}
+
+body.dark-mode .config-card-desc {
+    color: #999;
+}
+
+.config-link-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    color: white;
+    background: #4285f4;
+    border-radius: 12px;
+    text-align: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.config-link-btn:hover {
+    background: #3367d6;
+}
+
+body.dark-mode .config-link-btn {
+    background: #5a9bf4;
+}
+
+body.dark-mode .config-link-btn:hover {
+    background: #4a85e0;
+}
+
+.config-input-group {
+    width: 100%;
+}
+
+.config-input-group input {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 12px;
+    font-size: 13px;
+    box-sizing: border-box;
+    background: #e0e5ec;
+    box-shadow: inset 3px 3px 6px #bec5cc,
+               inset -3px -3px 6px #ffffff;
+    color: #2d4059;
+    font-family: monospace;
+    transition: all 0.3s ease;
+}
+
+body.dark-mode .config-input-group input {
+    background: #2d2d2d;
+    box-shadow: inset 3px 3px 6px #1a1a1a,
+               inset -3px -3px 6px #404040;
+    color: #e0e5ec;
+}
+
+.config-input-group input:focus {
+    outline: none;
+}
+
+.config-save-btn {
+    width: 100%;
+    padding: 12px 24px;
+    font-size: 15px;
+    font-weight: 600;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    color: white;
+    background: linear-gradient(145deg, #4CAF50, #45a049);
+    box-shadow: 5px 5px 10px #bec5cc,
+               -5px -5px 10px #ffffff;
+    transition: all 0.3s ease;
+}
+
+.config-save-btn:hover {
+    box-shadow: inset 3px 3px 6px rgba(0,0,0,0.2),
+               inset -3px -3px 6px rgba(255,255,255,0.1);
+}
+
+.config-save-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    box-shadow: none;
 }

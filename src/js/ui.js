@@ -57,31 +57,28 @@ export function updateAuthUI(user) {
     }
 }
 
-export function showConfigForm(userType) {
-    const form = document.getElementById('configForm');
+export function showConfigOnboarding(userType) {
+    const el = document.getElementById('configOnboarding');
     const warning = document.getElementById('configWarning');
-    const title = document.getElementById('configTitle');
+    if (!el) return;
 
-    form.classList.remove('hidden');
+    el.classList.remove('hidden');
 
     if (userType === 'guest') {
-        title.textContent = 'Configure Gemini (Guest Mode)';
         warning.textContent = 'API key stored in browser localStorage. Do not use in production.';
         warning.classList.add('visible');
     } else if (typeof DriveVault !== 'undefined' && DriveVault.isAvailable() === false) {
-        title.textContent = 'Configure Gemini';
         warning.textContent = 'Google Drive unavailable. Config stored in browser only.';
         warning.classList.add('visible');
     } else {
-        title.textContent = 'Configure Gemini';
         warning.textContent = 'API key saved securely to your Google Drive.';
         warning.classList.remove('visible');
     }
 }
 
-export function hideConfigForm() {
-    const form = document.getElementById('configForm');
-    form.classList.add('hidden');
+export function hideConfigOnboarding() {
+    const el = document.getElementById('configOnboarding');
+    if (el) el.classList.add('hidden');
 }
 
 export function showCamera(videoEl, overlayEl) {

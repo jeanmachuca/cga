@@ -33,6 +33,27 @@
                 <div id="loginContainer" class="login-container"></div>
             </div>
         </div>
+        <div id="configOnboarding" class="config-onboarding hidden">
+            <div class="config-card">
+                <h3>Initialize Neural Net</h3>
+                <p class="config-card-desc">To power my cognitive engine, I need a free Gemini API key. This key will be saved securely to your personal Google Drive vault.</p>
+                <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="config-link-btn">
+                    1. Get Free API Key
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                </a>
+                <div class="config-input-group">
+                    <input type="password" id="apiKey" placeholder="Paste your AIza... key here" autocomplete="off">
+                </div>
+                <div class="config-input-group">
+                    <input type="text" id="geminiModel" placeholder="Model (e.g. gemini-3.5-flash)">
+                </div>
+                <div class="config-input-group">
+                    <input type="text" id="knowledgeBaseUrl" placeholder="Knowledge Base URL (optional)">
+                </div>
+                <button class="config-save-btn" onclick="saveConfig()">2. Save &amp; Start</button>
+                <p class="config-warning" id="configWarning"></p>
+            </div>
+        </div>
         <div id="mainApp" class="hidden">
             <div class="avatar" id="avatar">
                 <img src="img/avatar.png" alt="Avatar Closed Mouth" class="closed-mouth">
@@ -44,14 +65,6 @@
                 <div id="trainingProgress" class="training-progress"></div>
             </div>
             <div class="controls">
-                <div id="configForm" class="config-form hidden">
-                    <h3 id="configTitle">Configure Gemini</h3>
-                    <input type="password" id="apiKey" placeholder="Gemini API Key">
-                    <input type="text" id="geminiModel" placeholder="Model (e.g. gemini-3.5-flash)">
-                    <input type="text" id="knowledgeBaseUrl" placeholder="Knowledge Base URL (optional)">
-                    <button id="saveConfigBtn" onclick="saveConfig()">Save</button>
-                    <p class="config-warning" id="configWarning"></p>
-                </div>
                 <textarea id="textToSpeak" placeholder="Type something or speak..."></textarea>
                 <div class="button-group">
                     <button class="mic-button" id="micButton" onclick="toggleListening()">&#127908;</button>

@@ -2,7 +2,7 @@ import { stop, speak } from './speech.js';
 import { loadConfig, saveConfig, getChatResponse, isConfigValid, loadHistory, getConfig } from './ai.js';
 import {
     updateStatusText, updateVoices, toggleTheme, updateAuthUI,
-    showConfigForm, hideConfigForm,
+    showConfigOnboarding, hideConfigOnboarding,
     showCamera, hideCamera, updateCameraStatus,
     showOnboardingOverlay, hideOnboardingOverlay, updateOnboardingText,
     updateTrainingProgress, hideTrainingProgress, t,
@@ -199,15 +199,19 @@ async function startFaceTraining() {
 
 function checkAndShowConfig() {
     if (!isConfigValid()) {
-        showConfigForm(Auth.isGoogleUser() ? 'google' : 'guest');
+        showConfigOnboarding(Auth.isGoogleUser() ? 'google' : 'guest');
     } else {
-        hideConfigForm();
+        hideConfigOnboarding();
     }
 }
 
 function tryShowMainApp() {
     if (isAppReady()) return;
     if (authUser && document.querySelector('input[name="language"]:checked')) {
+        if (!isConfigValid()) {
+            showConfigOnboarding(Auth.isGoogleUser() ? 'google' : 'guest');
+            return;
+        }
         setAppReady(true);
         showMainApp();
         startSession();
@@ -226,10 +230,10 @@ async function handleAuthChange(user) {
             alert('Google Drive is not available. Config will be stored in browser only.');
         }
 
-        hideConfigForm();
+        hideConfigOnboarding();
         tryShowMainApp();
     } else {
-        hideConfigForm();
+        hideConfigOnboarding();
         hideCamera();
         if (typeof DriveVault !== 'undefined') DriveVault.clearCache();
     }
@@ -280,7 +284,12 @@ window.onLanguageChange = function () {
 };
 window.saveConfig = async function () {
     await saveConfig();
-    hideConfigForm();
+    hideConfigOnboarding();
+    if (authUser && !isAppReady()) {
+        setAppReady(true);
+        showMainApp();
+        startSession();
+    }
 };
 
 document.addEventListener('DOMContentLoaded', () => {
