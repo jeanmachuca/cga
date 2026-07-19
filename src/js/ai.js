@@ -4,8 +4,7 @@ import { TEXTS } from './constants.js';
 
 const config = {
     apiKey: '',
-    azureResourceName: '',
-    deploymentName: '',
+    model: '',
     knowledgeBaseUrl: '',
 };
 
@@ -17,8 +16,7 @@ export async function loadConfig() {
             const driveConfig = await DriveVault.getFile('config');
             if (driveConfig) {
                 config.apiKey = driveConfig.apiKey || '';
-                config.azureResourceName = driveConfig.resourceName || '';
-                config.deploymentName = driveConfig.deploymentName || '';
+                config.model = driveConfig.model || APP_CONFIG.defaultModel;
                 config.knowledgeBaseUrl = driveConfig.knowledgeBaseUrl || '';
                 populateForm();
                 return;
@@ -28,27 +26,24 @@ export async function loadConfig() {
         }
     }
 
-    config.apiKey = localStorage.getItem('cga_azure_api_key') || '';
-    config.azureResourceName = localStorage.getItem('cga_azure_resource') || '';
-    config.deploymentName = localStorage.getItem('cga_azure_deployment') || '';
+    config.apiKey = localStorage.getItem('cga_gemini_api_key') || '';
+    config.model = localStorage.getItem('cga_gemini_model') || APP_CONFIG.defaultModel;
     config.knowledgeBaseUrl = localStorage.getItem('cga_knowledge_url') || '';
     populateForm();
 }
 
 function populateForm() {
     const apiKeyEl = document.getElementById('apiKey');
-    const resourceEl = document.getElementById('azureResourceName');
-    const deploymentEl = document.getElementById('deploymentName');
+    const modelEl = document.getElementById('geminiModel');
     const kbEl = document.getElementById('knowledgeBaseUrl');
     if (apiKeyEl) apiKeyEl.value = config.apiKey;
-    if (resourceEl) resourceEl.value = config.azureResourceName;
-    if (deploymentEl) deploymentEl.value = config.deploymentName;
+    if (modelEl) modelEl.value = config.model || APP_CONFIG.defaultModel;
     if (kbEl) kbEl.value = config.knowledgeBaseUrl;
 }
 
-export async function saveAzureConfig() {
-    config.azureResourceName = document.getElementById('azureResourceName').value;
-    config.deploymentName = document.getElementById('deploymentName').value;
+export async function saveConfig() {
+    config.apiKey = document.getElementById('apiKey').value;
+    config.model = document.getElementById('geminiModel').value || APP_CONFIG.defaultModel;
     config.knowledgeBaseUrl = document.getElementById('knowledgeBaseUrl')?.value || '';
     await persistConfig();
 }
@@ -56,8 +51,7 @@ export async function saveAzureConfig() {
 async function persistConfig() {
     const data = {
         apiKey: config.apiKey,
-        resourceName: config.azureResourceName,
-        deploymentName: config.deploymentName,
+        model: config.model,
         knowledgeBaseUrl: config.knowledgeBaseUrl,
     };
 
@@ -71,15 +65,14 @@ async function persistConfig() {
         }
     }
 
-    localStorage.setItem('cga_azure_api_key', config.apiKey);
-    localStorage.setItem('cga_azure_resource', config.azureResourceName);
-    localStorage.setItem('cga_azure_deployment', config.deploymentName);
+    localStorage.setItem('cga_gemini_api_key', config.apiKey);
+    localStorage.setItem('cga_gemini_model', config.model);
     localStorage.setItem('cga_knowledge_url', config.knowledgeBaseUrl);
     updateStatusText('configSaved');
 }
 
 export function isConfigValid() {
-    return config.apiKey && config.azureResourceName && config.deploymentName;
+    return !!config.apiKey;
 }
 
 export function getConfig() { return config; }
@@ -137,51 +130,43 @@ export async function getChatResponse(userInput) {
     }
 
     const isSpanish = document.querySelector('input[name="language"]:checked')?.value === 'es';
-    const azureEndpoint = `https://${config.azureResourceName}.openai.azure.com`;
-    const apiVersion = '2024-02-15-preview';
-
-    const messages = [];
+    const model = config.model || APP_CONFIG.defaultModel;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${config.apiKey}`;
 
     const systemPrompt = TEXTS[isSpanish ? 'es' : 'en'].systemPrompt;
-    messages.push({ role: 'system', content: systemPrompt });
-
-    if (conversationHistory.length > 0) {
-        const recent = conversationHistory.slice(-10);
-        for (const turn of recent) {
-            messages.push({ role: turn.role === 'assistant' ? 'assistant' : 'user', content: turn.content });
-        }
-    }
+    let systemText = systemPrompt;
 
     const kbContent = await fetchKnowledgeBase();
     if (kbContent) {
-        messages.push({ role: 'system', content: `Additional context from knowledge base:\n${kbContent}` });
+        systemText += `\n\nAdditional context from knowledge base:\n${kbContent}`;
     }
 
-    messages.push({ role: 'user', content: userInput });
+    const contents = [];
+    const recent = conversationHistory.slice(-10);
+    for (const turn of recent) {
+        contents.push({
+            role: turn.role === 'assistant' ? 'model' : 'user',
+            parts: [{ text: turn.content }],
+        });
+    }
+    contents.push({ role: 'user', parts: [{ text: userInput }] });
 
     try {
-        const response = await fetch(`${azureEndpoint}/openai/deployments/${config.deploymentName}/chat/completions?api-version=${apiVersion}`, {
+        const response = await fetch(url, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'api-key': config.apiKey,
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                messages,
-                max_tokens: 500,
-                temperature: 0.7,
-                top_p: 0.95,
-                frequency_penalty: 0,
-                presence_penalty: 0.3,
+                systemInstruction: { parts: [{ text: systemText }] },
+                contents,
             }),
         });
 
         if (!response.ok) {
-            throw new Error(`Azure OpenAI API request failed: ${response.status} ${response.statusText}`);
+            throw new Error(`Gemini API request failed: ${response.status}`);
         }
 
         const data = await response.json();
-        const aiResponse = cleanMarkdown(data.choices[0].message.content);
+        const aiResponse = cleanMarkdown(data.candidates[0].content.parts[0].text);
 
         addHistoryTurn('user', userInput);
         addHistoryTurn('assistant', aiResponse);
@@ -190,7 +175,7 @@ export async function getChatResponse(userInput) {
         updateStatusText('aiResponseObtained');
         return aiResponse;
     } catch (error) {
-        console.error('Error calling Azure OpenAI API:', error);
+        console.error('Error calling Gemini API:', error);
         updateStatusText('errorGettingResponse');
         return null;
     }

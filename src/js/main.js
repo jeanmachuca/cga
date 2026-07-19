@@ -1,5 +1,5 @@
 import { stop, speak } from './speech.js';
-import { loadConfig, saveAzureConfig, getChatResponse, isConfigValid, loadHistory, getConfig } from './ai.js';
+import { loadConfig, saveConfig, getChatResponse, isConfigValid, loadHistory, getConfig } from './ai.js';
 import {
     updateStatusText, updateVoices, toggleTheme, updateAuthUI,
     showConfigForm, hideConfigForm,
@@ -278,8 +278,8 @@ window.onLanguageChange = function () {
     updateVoices();
     tryShowMainApp();
 };
-window.saveAzureConfig = async function () {
-    await saveAzureConfig();
+window.saveConfig = async function () {
+    await saveConfig();
     hideConfigForm();
 };
 

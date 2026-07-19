@@ -65,15 +65,15 @@ export function showConfigForm(userType) {
     form.classList.remove('hidden');
 
     if (userType === 'guest') {
-        title.textContent = 'Configure Azure OpenAI (Guest Mode)';
+        title.textContent = 'Configure Gemini (Guest Mode)';
         warning.textContent = 'API key stored in browser localStorage. Do not use in production.';
         warning.classList.add('visible');
     } else if (typeof DriveVault !== 'undefined' && DriveVault.isAvailable() === false) {
-        title.textContent = 'Configure Azure OpenAI';
+        title.textContent = 'Configure Gemini';
         warning.textContent = 'Google Drive unavailable. Config stored in browser only.';
         warning.classList.add('visible');
     } else {
-        title.textContent = 'Configure Azure OpenAI';
+        title.textContent = 'Configure Gemini';
         warning.textContent = 'API key saved securely to your Google Drive.';
         warning.classList.remove('visible');
     }

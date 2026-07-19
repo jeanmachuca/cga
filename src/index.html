@@ -45,12 +45,11 @@
             </div>
             <div class="controls">
                 <div id="configForm" class="config-form hidden">
-                    <h3 id="configTitle">Configure Azure OpenAI</h3>
-                    <input type="password" id="apiKey" placeholder="Azure OpenAI API Key">
-                    <input type="text" id="azureResourceName" placeholder="Azure Resource Name">
-                    <input type="text" id="deploymentName" placeholder="Deployment Name">
+                    <h3 id="configTitle">Configure Gemini</h3>
+                    <input type="password" id="apiKey" placeholder="Gemini API Key">
+                    <input type="text" id="geminiModel" placeholder="Model (e.g. gemini-3.5-flash)">
                     <input type="text" id="knowledgeBaseUrl" placeholder="Knowledge Base URL (optional)">
-                    <button id="saveConfigBtn" onclick="saveAzureConfig()">Save</button>
+                    <button id="saveConfigBtn" onclick="saveConfig()">Save</button>
                     <p class="config-warning" id="configWarning"></p>
                 </div>
                 <textarea id="textToSpeak" placeholder="Type something or speak..."></textarea>

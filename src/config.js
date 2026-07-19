@@ -9,6 +9,7 @@ const APP_CONFIG = {
   scopes: 'https://www.googleapis.com/auth/drive.appdata',
   faceDescriptorsFile: 'cga_face_descriptors.json',
   maxHistoryTurns: 15,
+  defaultModel: 'gemini-3.5-flash',
   knowledgeBaseUrl: '',
   faceDetection: {
     descriptorThreshold: 0.6,
