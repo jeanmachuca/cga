@@ -32,6 +32,9 @@ export const TEXTS = {
     faceDetectTimeout: "I couldn't detect your face in time. Let's continue without face recognition.",
     cameraReady: 'Camera active',
     cameraOff: 'Camera off',
+    stopped: 'Stopped',
+    repeated: 'Repeating...',
+    cleared: 'Cleared',
   },
   es: {
     placeholder: 'Escribe algo o habla...',
@@ -66,5 +69,8 @@ export const TEXTS = {
     faceDetectTimeout: "No pude detectar tu rostro a tiempo. Continuemos sin reconocimiento facial.",
     cameraReady: 'Cámara activa',
     cameraOff: 'Cámara apagada',
+    stopped: 'Detenido',
+    repeated: 'Repitiendo...',
+    cleared: 'Borrado',
   },
 };

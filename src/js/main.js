@@ -16,6 +16,7 @@ import {
 } from './state.js';
 
 let authUser = null;
+let lastResponse = '';
 
 if (!initializeSpeechRecognition()) {
     console.warn('Speech recognition initialization failed');
@@ -93,15 +94,52 @@ function autoListen() {
     startSpeechRecognition('en-US');
 }
 
+function voiceCommandsHandler(text) {
+    const lower = text.toLowerCase().trim();
+
+    if (/\b(stop|halt|shut up)\b/i.test(lower) ||
+        /\b(para|calla|silencio|alto)\b/i.test(lower)) {
+        stop();
+        updateStatusText('stopped');
+        return null;
+    }
+
+    if (/\b(repeat|say again|what did you say)\b/i.test(lower) ||
+        /\b(repite|repítelo|otravez)\b/i.test(lower)) {
+        if (lastResponse) speakWithAutoListen(lastResponse);
+        return null;
+    }
+
+    if (/\b(clear|erase|reset)\b/i.test(lower) ||
+        /\b(borra|limpia|borrar)\b/i.test(lower)) {
+        document.getElementById('textToSpeak').value = '';
+        updateStatusText('cleared');
+        return null;
+    }
+
+    return text;
+}
+
+function filterInput(text) {
+    let result = voiceCommandsHandler(text);
+    // future: result = profanityFilter(result);
+    // future: result = intentClassifier(result);
+    return result;
+}
+
 async function handleUserInput(text) {
+    const filtered = filterInput(text);
+    if (filtered === null) return;
+
     const state = getOnboardingState();
     if (state !== 'idle') {
-        await handleOnboardingInput(text);
+        await handleOnboardingInput(filtered);
         return;
     }
     updateStatusText('thinking');
-    const response = await getChatResponse(text);
+    const response = await getChatResponse(filtered);
     if (response) {
+        lastResponse = response;
         document.getElementById('textToSpeak').value = response;
         speakWithAutoListen(response);
     }
@@ -111,6 +149,7 @@ function speakWithAutoListen(text) {
     speak(text, () => {
         setTimeout(() => autoListen(), 500);
     });
+    autoListen();
 }
 
 async function handleOnboardingInput(text) {
@@ -274,6 +313,7 @@ async function startSession() {
     }
 }
 
+window.stop = stop;
 window.toggleListening = toggleListening;
 window.toggleTheme = toggleTheme;
 window.onLanguageChange = function () {
