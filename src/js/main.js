@@ -152,7 +152,6 @@ function speakWithAutoListen(text) {
     speak(text, () => {
         setTimeout(() => autoListen(), 500);
     });
-    autoListen();
 }
 
 async function handleOnboardingInput(text) {
