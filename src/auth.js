@@ -97,6 +97,10 @@ const Auth = (() => {
     accessToken = null;
     tokenExpiry = 0;
     saveSession(null);
+    localStorage.removeItem('cga_gemini_api_key');
+    localStorage.removeItem('cga_gemini_model');
+    localStorage.removeItem('cga_knowledge_url');
+    localStorage.removeItem('cga_config');
     if (typeof DriveVault !== 'undefined') DriveVault.clearCache();
     if (window.google?.accounts?.id) {
       google.accounts.id.disableAutoSelect();
