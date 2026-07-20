@@ -12,17 +12,13 @@ let conversationHistory = [];
 
 export async function loadConfig() {
     if (typeof Auth !== 'undefined' && Auth.isGoogleUser() && Auth.getToken()) {
-        try {
-            const driveConfig = await DriveVault.getFile('config');
-            if (driveConfig) {
-                config.apiKey = driveConfig.apiKey || '';
-                config.model = driveConfig.model || APP_CONFIG.defaultModel;
-                config.knowledgeBaseUrl = driveConfig.knowledgeBaseUrl || '';
-                populateForm();
-                return;
-            }
-        } catch (e) {
-            console.warn('Failed to load config from Drive:', e);
+        const data = await DriveVault.getFile('config');
+        if (data) {
+            config.apiKey = data.apiKey || '';
+            config.model = data.model || APP_CONFIG.defaultModel;
+            config.knowledgeBaseUrl = data.knowledgeBaseUrl || '';
+            populateForm();
+            return;
         }
     }
 
@@ -55,18 +51,19 @@ async function persistConfig() {
         knowledgeBaseUrl: config.knowledgeBaseUrl,
     };
 
-    localStorage.setItem('cga_gemini_api_key', config.apiKey);
-    localStorage.setItem('cga_gemini_model', config.model);
-    localStorage.setItem('cga_knowledge_url', config.knowledgeBaseUrl);
-
     if (typeof Auth !== 'undefined' && Auth.isGoogleUser() && Auth.getToken()) {
         try {
             await DriveVault.saveFile('config', data);
+            updateStatusText('configSaved');
+            return;
         } catch (e) {
             console.warn('Failed to save config to Drive:', e);
         }
     }
 
+    localStorage.setItem('cga_gemini_api_key', config.apiKey);
+    localStorage.setItem('cga_gemini_model', config.model);
+    localStorage.setItem('cga_knowledge_url', config.knowledgeBaseUrl);
     updateStatusText('configSaved');
 }
 
