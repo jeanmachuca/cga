@@ -35,7 +35,7 @@ export function updateVoices() {
 
 export function toggleTheme() {
     document.body.classList.toggle('dark-mode');
-    localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+    saveConfig('darkMode', document.body.classList.contains('dark-mode'));
 }
 
 export function updateAuthUI(user) {
@@ -142,18 +142,28 @@ export function showMainApp() {
     }
 }
 
-export function saveLanguage(lang) {
-    localStorage.setItem(APP_CONFIG.languageKey, encodeData(lang));
+export function hideMainApp() {
+    const mainApp = document.getElementById('mainApp');
+    const welcomeScreen = document.getElementById('welcomeScreen');
+    if (mainApp) {
+        mainApp.classList.add('hidden');
+        mainApp.classList.remove('main-app-visible');
+    }
+    if (welcomeScreen) {
+        welcomeScreen.classList.remove('welcome-compact');
+    }
 }
 
-export function loadLanguage() {
-    const raw = localStorage.getItem(APP_CONFIG.languageKey);
-    const decoded = raw ? decodeData(raw) : null;
-    return decoded || 'en';
+export async function saveLanguage(lang) {
+    await saveConfig(STORAGE_KEYS.language, lang);
 }
 
-export function restoreLanguage() {
-    const saved = loadLanguage();
+export async function loadLanguage() {
+    return await loadConfig(STORAGE_KEYS.language) || 'en';
+}
+
+export async function restoreLanguage() {
+    const saved = await loadLanguage();
     const radio = document.querySelector(`input[name="language"][value="${saved}"]`);
     if (radio) {
         radio.checked = true;
@@ -161,6 +171,8 @@ export function restoreLanguage() {
     }
 }
 
-if (localStorage.getItem('darkMode') === 'true') {
-    document.body.classList.add('dark-mode');
-}
+(async () => {
+    if (await loadConfig('darkMode') === true) {
+        document.body.classList.add('dark-mode');
+    }
+})();

@@ -1,12 +1,12 @@
 import { stop, speak } from './speech.js';
-import { loadConfig, saveConfig, getChatResponse, isConfigValid, loadHistory, getConfig } from './ai.js';
+import { loadAppConfig, saveAppConfig, getChatResponse, isConfigValid, loadHistory, getConfig } from './ai.js';
 import {
     updateStatusText, updateVoices, toggleTheme, updateAuthUI,
     showConfigOnboarding, hideConfigOnboarding,
     showCamera, hideCamera, updateCameraStatus,
     showOnboardingOverlay, hideOnboardingOverlay, updateOnboardingText,
     updateTrainingProgress, hideTrainingProgress, t,
-    showMainApp, saveLanguage, restoreLanguage, getSelectedLanguage,
+    showMainApp, hideMainApp, saveLanguage, restoreLanguage, getSelectedLanguage,
 } from './ui.js';
 import {
     initializeSpeechRecognition, speechRecognition, setListening, isListening,
@@ -223,7 +223,7 @@ async function startFaceTraining() {
     Face.stopCamera();
 
     if (success) {
-        await DriveVault.saveFile('face', Face.getStoredDescriptors());
+        await saveConfig(STORAGE_KEYS.face, Face.getStoredDescriptors());
         setOnboardingState('idle');
         hideOnboardingOverlay();
         hideCamera();
@@ -264,7 +264,7 @@ async function handleAuthChange(user) {
     updateAuthUI(user);
 
     if (user) {
-        await loadConfig();
+        await loadAppConfig();
         await loadHistory();
 
         if (typeof DriveVault !== 'undefined' && Auth.isGoogleUser() && DriveVault.isAvailable() === false) {
@@ -276,12 +276,13 @@ async function handleAuthChange(user) {
     } else {
         hideConfigOnboarding();
         hideCamera();
+        hideMainApp();
         if (typeof DriveVault !== 'undefined') DriveVault.clearCache();
     }
 }
 
 async function startSession() {
-    const faceData = await DriveVault.getFile('face');
+    const faceData = await loadConfig(STORAGE_KEYS.face);
     if (faceData && faceData.descriptors) {
         Face.setStoredDescriptors(faceData);
         showCamera();
@@ -324,8 +325,8 @@ window.onLanguageChange = function () {
     updateVoices();
     tryShowMainApp();
 };
-window.saveConfig = async function () {
-    await saveConfig();
+window.handleConfigSave = async function () {
+    await saveAppConfig();
     hideConfigOnboarding();
     if (authUser && !isAppReady()) {
         setAppReady(true);
@@ -334,8 +335,17 @@ window.saveConfig = async function () {
     }
 };
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     restoreLanguage();
     Auth.onAuthChange(handleAuthChange);
-    handleAuthChange(Auth.getUser());
+
+    document.getElementById('textToSpeak').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            const text = e.target.value.trim();
+            if (text) handleUserInput(text);
+        }
+    });
+
+    await Auth.restoreSession();
 });
