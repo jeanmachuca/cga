@@ -5,11 +5,14 @@ import {
     setVoices, getVoices
 } from './state.js';
 
-export const speechSynthesis = window.speechSynthesis;
+function getSynth() { return window.speechSynthesis; }
 
-speechSynthesis.onvoiceschanged = () => {
-    setVoices(speechSynthesis.getVoices());
-};
+const synth = getSynth();
+if (synth) {
+    synth.onvoiceschanged = () => {
+        setVoices(synth.getVoices());
+    };
+}
 
 export function getSelectedVoice() {
     const selectedLanguage = document.querySelector('input[name="language"]:checked')?.value || 'en';
@@ -65,7 +68,7 @@ let keepAliveInterval = null;
 function startKeepAlive() {
     stopKeepAlive();
     keepAliveInterval = setInterval(() => {
-        if (speechSynthesis.speaking) speechSynthesis.resume();
+        if (getSynth().speaking) getSynth().resume();
     }, 14000);
 }
 
@@ -77,7 +80,7 @@ function stopKeepAlive() {
 function waitForSpeechReady() {
     return new Promise((resolve) => {
         const check = () => {
-            if (!speechSynthesis.speaking && !speechSynthesis.pending) {
+            if (!getSynth().speaking && !getSynth().pending) {
                 resolve();
             } else {
                 setTimeout(check, 50);
@@ -143,7 +146,7 @@ async function processQueue() {
                 next.onend = speakNextChunk;
                 next.onstart = () => updateMouthAnimation();
                 next.onboundary = (e) => { if (e.name === 'word') updateMouthAnimation(); };
-                speechSynthesis.speak(next);
+                getSynth().speak(next);
             } else {
                 active = false;
                 await afterUtterance();
@@ -174,11 +177,11 @@ async function processQueue() {
 
     setSpeaking(true);
     startKeepAlive();
-    speechSynthesis.speak(utterance);
+    getSynth().speak(utterance);
 }
 
 export function stop() {
-    speechSynthesis.cancel();
+    getSynth().cancel();
     stopKeepAlive();
     speechQueue.length = 0;
     isProcessingQueue = false;
