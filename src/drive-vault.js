@@ -100,7 +100,8 @@ const DriveVault = (() => {
   }
 
   function localStorageKey(type) {
-    return `cga_${type}`;
+    const map = { config: APP_CONFIG.configKey };
+    return map[type] || `cga_${type}`;
   }
 
   async function getFile(type) {
@@ -117,7 +118,8 @@ const DriveVault = (() => {
 
     const raw = localStorage.getItem(localStorageKey(type));
     if (raw) {
-      try { cache[type] = JSON.parse(raw); return cache[type]; } catch {}
+      const decoded = decodeData(raw);
+      if (decoded) { cache[type] = decoded; return decoded; }
     }
 
     return null;
@@ -136,7 +138,7 @@ const DriveVault = (() => {
       }
     }
 
-    localStorage.setItem(localStorageKey(type), JSON.stringify(data));
+    localStorage.setItem(localStorageKey(type), encodeData(data));
   }
 
   function clearCache() {

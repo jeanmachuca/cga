@@ -22,9 +22,12 @@ export async function loadConfig() {
         }
     }
 
-    config.apiKey = localStorage.getItem('cga_gemini_api_key') || '';
-    config.model = localStorage.getItem('cga_gemini_model') || APP_CONFIG.defaultModel;
-    config.knowledgeBaseUrl = localStorage.getItem('cga_knowledge_url') || '';
+    const rawKey = localStorage.getItem(APP_CONFIG.apiKeyKey);
+    const rawModel = localStorage.getItem(APP_CONFIG.modelKey);
+    const rawKb = localStorage.getItem(APP_CONFIG.kbUrlKey);
+    config.apiKey = (rawKey ? decodeData(rawKey) : null) || '';
+    config.model = (rawModel ? decodeData(rawModel) : null) || APP_CONFIG.defaultModel;
+    config.knowledgeBaseUrl = (rawKb ? decodeData(rawKb) : null) || '';
     populateForm();
 }
 
@@ -61,9 +64,9 @@ async function persistConfig() {
         }
     }
 
-    localStorage.setItem('cga_gemini_api_key', config.apiKey);
-    localStorage.setItem('cga_gemini_model', config.model);
-    localStorage.setItem('cga_knowledge_url', config.knowledgeBaseUrl);
+    localStorage.setItem(APP_CONFIG.apiKeyKey, encodeData(config.apiKey));
+    localStorage.setItem(APP_CONFIG.modelKey, encodeData(config.model));
+    localStorage.setItem(APP_CONFIG.kbUrlKey, encodeData(config.knowledgeBaseUrl));
     updateStatusText('configSaved');
 }
 

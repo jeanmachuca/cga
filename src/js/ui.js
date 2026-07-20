@@ -143,11 +143,13 @@ export function showMainApp() {
 }
 
 export function saveLanguage(lang) {
-    localStorage.setItem('cga_language', lang);
+    localStorage.setItem(APP_CONFIG.languageKey, encodeData(lang));
 }
 
 export function loadLanguage() {
-    return localStorage.getItem('cga_language') || 'en';
+    const raw = localStorage.getItem(APP_CONFIG.languageKey);
+    const decoded = raw ? decodeData(raw) : null;
+    return decoded || 'en';
 }
 
 export function restoreLanguage() {

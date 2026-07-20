@@ -8,22 +8,21 @@ const Auth = (() => {
   function loadSession() {
     const raw = localStorage.getItem(APP_CONFIG.storageKey);
     if (raw) {
-      try {
-        currentUser = JSON.parse(raw);
-      } catch { currentUser = null; }
+      const decoded = decodeData(raw);
+      currentUser = decoded || null;
     }
   }
 
   function saveSession(user) {
     currentUser = user;
     if (user) {
-      localStorage.setItem(APP_CONFIG.storageKey, JSON.stringify(user));
+      localStorage.setItem(APP_CONFIG.storageKey, encodeData(user));
     } else {
       localStorage.removeItem(APP_CONFIG.storageKey);
-      localStorage.removeItem('cga_gemini_api_key');
-      localStorage.removeItem('cga_gemini_model');
-      localStorage.removeItem('cga_knowledge_url');
-      localStorage.removeItem('cga_config');
+      localStorage.removeItem(APP_CONFIG.configKey);
+      localStorage.removeItem(APP_CONFIG.apiKeyKey);
+      localStorage.removeItem(APP_CONFIG.modelKey);
+      localStorage.removeItem(APP_CONFIG.kbUrlKey);
     }
   }
 
