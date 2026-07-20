@@ -5,24 +5,16 @@ const Auth = (() => {
   let listeners = [];
   let restored = false;
 
-  function loadSession() {
-    const raw = localStorage.getItem(APP_CONFIG.storageKey);
-    if (raw) {
-      const decoded = decodeData(raw);
-      currentUser = decoded || null;
-    }
+  async function loadSession() {
+    currentUser = await loadConfig(STORAGE_KEYS.session);
   }
 
-  function saveSession(user) {
+  async function saveSession(user) {
     currentUser = user;
     if (user) {
-      localStorage.setItem(APP_CONFIG.storageKey, encodeData(user));
+      await saveConfig(STORAGE_KEYS.session, user);
     } else {
-      localStorage.removeItem(APP_CONFIG.storageKey);
-      localStorage.removeItem(APP_CONFIG.configKey);
-      localStorage.removeItem(APP_CONFIG.apiKeyKey);
-      localStorage.removeItem(APP_CONFIG.modelKey);
-      localStorage.removeItem(APP_CONFIG.kbUrlKey);
+      await cleanConfig();
     }
   }
 
@@ -42,7 +34,7 @@ const Auth = (() => {
     return () => { listeners = listeners.filter(f => f !== fn); };
   }
 
-  function signIn(credential) {
+  async function signIn(credential) {
     const payload = JSON.parse(atob(credential.split('.')[1]));
     const user = {
       uid: payload.sub,
@@ -50,7 +42,8 @@ const Auth = (() => {
       email: payload.email,
       photoURL: payload.picture,
     };
-    saveSession(user);
+    await saveSession(user);
+    notify();
     requestDriveAccess({ prompt: 'consent' });
     return user;
   }
@@ -85,9 +78,10 @@ const Auth = (() => {
     tokenClient.requestAccessToken(opts || { prompt: 'consent' });
   }
 
-  function restoreSession() {
-    loadSession();
+  async function restoreSession() {
+    await loadSession();
     if (currentUser && isGoogleUser() && !accessToken) {
+      notify();
       requestDriveAccess({ prompt: '' });
     } else {
       notify();
@@ -95,11 +89,11 @@ const Auth = (() => {
     restored = true;
   }
 
-  function signOut() {
+  async function signOut() {
     currentUser = null;
     accessToken = null;
     tokenExpiry = 0;
-    saveSession(null);
+    await saveSession(null);
     if (typeof DriveVault !== 'undefined') DriveVault.clearCache();
     if (window.google?.accounts?.id) {
       google.accounts.id.disableAutoSelect();
@@ -132,7 +126,7 @@ const Auth = (() => {
     container.appendChild(guestBtn);
   }
 
-  function guestSignIn() {
+  async function guestSignIn() {
     const id = 'guest_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
     const user = {
       uid: id,
@@ -140,7 +134,7 @@ const Auth = (() => {
       email: '',
       photoURL: '',
     };
-    saveSession(user);
+    await saveSession(user);
     notify();
   }
 

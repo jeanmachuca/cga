@@ -10,24 +10,10 @@ const config = {
 
 let conversationHistory = [];
 
-export async function loadConfig() {
-    if (typeof Auth !== 'undefined' && Auth.isGoogleUser() && Auth.getToken()) {
-        const data = await DriveVault.getFile('config');
-        if (data) {
-            config.apiKey = data.apiKey || '';
-            config.model = data.model || APP_CONFIG.defaultModel;
-            config.knowledgeBaseUrl = data.knowledgeBaseUrl || '';
-            populateForm();
-            return;
-        }
-    }
-
-    const rawKey = localStorage.getItem(APP_CONFIG.apiKeyKey);
-    const rawModel = localStorage.getItem(APP_CONFIG.modelKey);
-    const rawKb = localStorage.getItem(APP_CONFIG.kbUrlKey);
-    config.apiKey = (rawKey ? decodeData(rawKey) : null) || '';
-    config.model = (rawModel ? decodeData(rawModel) : null) || APP_CONFIG.defaultModel;
-    config.knowledgeBaseUrl = (rawKb ? decodeData(rawKb) : null) || '';
+export async function loadAppConfig() {
+    config.apiKey = (await loadConfig(STORAGE_KEYS.apiKey)) || '';
+    config.model = (await loadConfig(STORAGE_KEYS.model)) || APP_CONFIG.defaultModel;
+    config.knowledgeBaseUrl = (await loadConfig(STORAGE_KEYS.kbUrl)) || '';
     populateForm();
 }
 
@@ -40,33 +26,13 @@ function populateForm() {
     if (kbEl) kbEl.value = config.knowledgeBaseUrl;
 }
 
-export async function saveConfig() {
+export async function saveAppConfig() {
     config.apiKey = document.getElementById('apiKey').value;
     config.model = document.getElementById('geminiModel').value || APP_CONFIG.defaultModel;
     config.knowledgeBaseUrl = document.getElementById('knowledgeBaseUrl')?.value || '';
-    await persistConfig();
-}
-
-async function persistConfig() {
-    const data = {
-        apiKey: config.apiKey,
-        model: config.model,
-        knowledgeBaseUrl: config.knowledgeBaseUrl,
-    };
-
-    if (typeof Auth !== 'undefined' && Auth.isGoogleUser() && Auth.getToken()) {
-        try {
-            await DriveVault.saveFile('config', data);
-            updateStatusText('configSaved');
-            return;
-        } catch (e) {
-            console.warn('Failed to save config to Drive:', e);
-        }
-    }
-
-    localStorage.setItem(APP_CONFIG.apiKeyKey, encodeData(config.apiKey));
-    localStorage.setItem(APP_CONFIG.modelKey, encodeData(config.model));
-    localStorage.setItem(APP_CONFIG.kbUrlKey, encodeData(config.knowledgeBaseUrl));
+    await saveConfig(STORAGE_KEYS.apiKey, config.apiKey);
+    await saveConfig(STORAGE_KEYS.model, config.model);
+    await saveConfig(STORAGE_KEYS.kbUrl, config.knowledgeBaseUrl);
     updateStatusText('configSaved');
 }
 
@@ -77,25 +43,13 @@ export function isConfigValid() {
 export function getConfig() { return config; }
 
 export async function loadHistory() {
-    try {
-        const data = await DriveVault.getFile('history');
-        if (data && Array.isArray(data.turns)) {
-            conversationHistory = data.turns;
-            return;
-        }
-    } catch (e) {
-        console.warn('Failed to load history:', e);
-    }
-    conversationHistory = [];
+    const data = await loadConfig(STORAGE_KEYS.history);
+    conversationHistory = (data && Array.isArray(data.turns)) ? data.turns : [];
 }
 
 export async function saveHistory() {
     const trimmed = conversationHistory.slice(-APP_CONFIG.maxHistoryTurns);
-    try {
-        await DriveVault.saveFile('history', { turns: trimmed });
-    } catch (e) {
-        console.warn('Failed to save history:', e);
-    }
+    await saveConfig(STORAGE_KEYS.history, { turns: trimmed });
 }
 
 export function addHistoryTurn(role, content) {

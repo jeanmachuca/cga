@@ -1,0 +1,16 @@
+{
+  "name": "cognitive-avatar",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cognitive Avatar — AI voice assistant with face recognition",
+  "scripts": {
+    "test": "npx playwright test",
+    "test:headed": "npx playwright test --headed",
+    "test:debug": "npx playwright test --debug",
+    "test:report": "npx playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.52.0",
+    "serve": "^14.2.4"
+  }
+}

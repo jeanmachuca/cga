@@ -13,3 +13,7 @@ dist/
 .idea/
 .vscode/
 *.sw?
+
+# Playwright
+test-results/
+playwright-report/
