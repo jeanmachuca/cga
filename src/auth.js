@@ -1,6 +1,7 @@
 const Auth = (() => {
   let currentUser = null;
   let accessToken = null;
+  let tokenExpiry = 0;
   let listeners = [];
   let restored = false;
 
@@ -30,6 +31,7 @@ const Auth = (() => {
   function getToken() { return accessToken; }
   function isSignedIn() { return !!currentUser; }
   function isGoogleUser() { return !!currentUser && !currentUser.uid.startsWith('guest_'); }
+  function isTokenValid() { return !!accessToken && Date.now() < tokenExpiry; }
 
   function onAuthChange(fn) {
     listeners.push(fn);
@@ -63,6 +65,7 @@ const Auth = (() => {
           return;
         }
         accessToken = tokenResponse.access_token;
+        tokenExpiry = Date.now() + (tokenResponse.expires_in || 3600) * 1000 - 60000;
         DriveVault.testConnection().then(ok => {
           if (!ok) {
             console.warn('Drive vault unavailable — config will use browser storage only');
@@ -92,7 +95,9 @@ const Auth = (() => {
   function signOut() {
     currentUser = null;
     accessToken = null;
+    tokenExpiry = 0;
     saveSession(null);
+    if (typeof DriveVault !== 'undefined') DriveVault.clearCache();
     if (window.google?.accounts?.id) {
       google.accounts.id.disableAutoSelect();
     }
@@ -136,5 +141,5 @@ const Auth = (() => {
     notify();
   }
 
-  return { getUser, getToken, isSignedIn, isGoogleUser, onAuthChange, signIn, signOut, renderButton, guestSignIn, restoreSession };
+  return { getUser, getToken, isSignedIn, isGoogleUser, isTokenValid, onAuthChange, signIn, signOut, renderButton, guestSignIn, restoreSession };
 })();

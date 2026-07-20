@@ -4,7 +4,7 @@ const DriveVault = (() => {
 
   async function testConnection() {
     const token = Auth.getToken();
-    if (!token) { driveAvailable = false; return false; }
+    if (!token || !Auth.isTokenValid()) { driveAvailable = false; return false; }
 
     const testFileName = '__drive_test_' + Date.now();
     try {
@@ -49,7 +49,7 @@ const DriveVault = (() => {
     if (!token) return null;
 
     const res = await fetch(
-      `https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name='${fileName}'&fields=files(id)`,
+      `https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name%3D'${encodeURIComponent(fileName)}'&fields=files(id)`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
 
@@ -73,7 +73,7 @@ const DriveVault = (() => {
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
 
     const listRes = await fetch(
-      `https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name='${fileName}'&fields=files(id)`,
+      `https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name%3D'${encodeURIComponent(fileName)}'&fields=files(id)`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
 
@@ -106,7 +106,7 @@ const DriveVault = (() => {
   async function getFile(type) {
     if (cache[type]) return cache[type];
 
-    if (Auth.isGoogleUser() && Auth.getToken()) {
+    if (Auth.isGoogleUser() && Auth.isTokenValid()) {
       try {
         const data = await readDriveFile(APP_CONFIG[`drive${type.charAt(0).toUpperCase() + type.slice(1).replace(/([A-Z])/g, m => m)}File`] || `${APP_CONFIG.appName.toLowerCase().replace(/ /g, '_')}_${type}.json`);
         if (data) { cache[type] = data; return data; }
@@ -126,7 +126,7 @@ const DriveVault = (() => {
   async function saveFile(type, data) {
     cache[type] = data;
 
-    if (Auth.isGoogleUser() && Auth.getToken()) {
+    if (Auth.isGoogleUser() && Auth.isTokenValid()) {
       try {
         const driveFileName = `${APP_CONFIG.appName.toLowerCase().replace(/ /g, '_')}_${type}.json`;
         await writeDriveFile(driveFileName, data);
